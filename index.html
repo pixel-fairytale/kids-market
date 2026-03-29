@@ -155,14 +155,6 @@
     .msg-text { color: #444; }
     .msg-time { font-size: 0.75rem; color: #bbb; margin-top: 2px; }
     .no-messages { padding: 10px 14px; font-size: 0.82rem; color: #bbb; }
-    .msg-reply-quote {
-      background: #f3f0ff; border-right: 3px solid #6c5ce7; border-radius: 4px;
-      padding: 5px 8px; margin-bottom: 5px; font-size: 0.8rem; color: #555;
-    }
-    .msg-reply-quote .quote-sender { font-weight: bold; color: #6c5ce7; font-size: 0.75rem; margin-bottom: 2px; }
-    .msg-reply-quote .quote-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
-    .btn-reply { background: none; border: none; color: #6c5ce7; font-size: 0.78rem; cursor: pointer; padding: 2px 0; margin-top: 4px; }
-    .btn-reply:hover { text-decoration: underline; }
 
     /* EMPTY STATE */
     .empty-state { text-align: center; padding: 60px 20px; color: #aaa; font-size: 1.05rem; }
@@ -511,10 +503,6 @@
 <div class="modal-overlay" id="msg-modal-overlay">
   <div class="modal">
     <h3>שלח הודעה למפרסם</h3>
-    <div id="msg-reply-context" style="display:none; background:#f3f0ff; border-right:3px solid #6c5ce7; border-radius:4px; padding:6px 10px; margin-bottom:10px; font-size:0.82rem; color:#555;">
-      <div style="font-weight:bold; color:#6c5ce7; font-size:0.75rem; margin-bottom:2px;" id="msg-reply-to-name"></div>
-      <div id="msg-reply-to-text" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
-    </div>
     <div class="form-group">
       <label>מי יראה את ההודעה?</label>
       <div class="msg-visibility">
@@ -821,21 +809,11 @@
         } else {
           msgs.forEach(m => {
             const badge = m.isPrivate ? '<span class="msg-private-badge">🔒 פרטי</span>' : '';
-            const quoteHtml = m.replyTo ? `<div class="msg-reply-quote">
-              <div class="quote-sender">↩ תגובה ל-${escHtml(m.replyTo.senderName)}</div>
-              <div class="quote-text">${escHtml(m.replyTo.text)}</div>
-            </div>` : '';
-            const item = document.createElement('div');
-            item.className = 'msg-item';
-            item.innerHTML = `${quoteHtml}
+            msgSec.innerHTML += `<div class="msg-item">
               <div class="msg-sender">${badge}${escHtml(m.senderName)}</div>
               <div class="msg-text">${escHtml(m.text)}</div>
               <div class="msg-time">${formatTime(m.createdAt)}</div>
-              <button class="btn-reply">↩ הגב</button>`;
-            item.querySelector('.btn-reply').addEventListener('click', () =>
-              openMsgModal(p.id, { senderName: m.senderName, text: m.text })
-            );
-            msgSec.appendChild(item);
+            </div>`;
           });
         }
       });
@@ -1143,7 +1121,6 @@
 
   /* ── SEND MESSAGE MODAL ── */
   let msgIsPrivate = false;
-  let msgReplyTo = null;
 
   document.getElementById('vis-public').addEventListener('click', () => {
     msgIsPrivate = false;
@@ -1156,25 +1133,16 @@
     document.getElementById('vis-public').classList.remove('selected');
   });
 
-  function openMsgModal(productId, replyTo = null) {
+  function openMsgModal(productId) {
     requireAuth(() => {
       msgTargetProductId = productId;
       msgIsPrivate = false;
-      msgReplyTo = replyTo;
       document.getElementById('vis-public').classList.add('selected');
       document.getElementById('vis-private').classList.remove('selected');
       document.getElementById('msg-text').value = '';
       document.getElementById('msg-error').style.display = 'none';
       const btn = document.getElementById('send-msg-btn');
       btn.disabled = false; btn.textContent = 'שלח הודעה';
-      const ctx = document.getElementById('msg-reply-context');
-      if (replyTo) {
-        document.getElementById('msg-reply-to-name').textContent = replyTo.senderName;
-        document.getElementById('msg-reply-to-text').textContent = replyTo.text;
-        ctx.style.display = 'block';
-      } else {
-        ctx.style.display = 'none';
-      }
       document.getElementById('msg-modal-overlay').classList.add('open');
     });
   }
@@ -1182,7 +1150,6 @@
   function closeMsgModal() {
     document.getElementById('msg-modal-overlay').classList.remove('open');
     msgTargetProductId = null;
-    msgReplyTo = null;
   }
 
   document.getElementById('cancel-msg-btn').addEventListener('click', closeMsgModal);
@@ -1200,15 +1167,13 @@
 
     try {
       const msgsCol = collection(db, 'products', msgTargetProductId, 'messages');
-      const msgData = {
+      await addDoc(msgsCol, {
         text,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || 'אנונימי',
         isPrivate: msgIsPrivate,
         createdAt: Date.now()
-      };
-      if (msgReplyTo) msgData.replyTo = msgReplyTo;
-      await addDoc(msgsCol, msgData);
+      });
       closeMsgModal();
       showToast('ההודעה נשלחה!');
     } catch(e) {
