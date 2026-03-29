@@ -388,6 +388,9 @@
   <div class="header-right">
     <div id="user-area">
       <span id="user-name"></span>
+      <button id="inbox-btn" style="display:none; background:white; border:none; border-radius:20px; padding:7px 12px; font-size:0.85rem; cursor:pointer; color:#6c5ce7; font-weight:bold; position:relative;">
+        📬 <span id="inbox-badge" style="display:none; position:absolute; top:-4px; right:-4px; background:#ff6b6b; color:white; border-radius:50%; width:16px; height:16px; font-size:0.65rem; line-height:16px; text-align:center;">!</span>
+      </button>
       <button id="login-btn">התחבר עם Google</button>
       <button id="logout-btn">התנתק</button>
     </div>
@@ -411,7 +414,7 @@
     </p>
   </div>
   <button id="start-btn">הבא ←</button>
-  <div style="font-size:0.72rem; color:rgba(255,255,255,0.6);">v1.1</div>
+  <div style="font-size:0.72rem; color:rgba(255,255,255,0.6);">v1.2</div>
 </div>
 
 <!-- HOME -->
@@ -516,7 +519,7 @@
       <div style="font-weight:bold; color:#6c5ce7; font-size:0.75rem; margin-bottom:2px;" id="msg-reply-to-name"></div>
       <div id="msg-reply-to-text" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="msg-vis-row">
       <label>מי יראה את ההודעה?</label>
       <div class="msg-visibility">
         <button class="msg-vis-btn selected" id="vis-public">🌍 לכולם</button>
@@ -531,6 +534,17 @@
     <div class="modal-actions">
       <button class="btn-primary" id="send-msg-btn">שלח הודעה</button>
       <button class="btn-secondary" id="cancel-msg-btn">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- INBOX MODAL -->
+<div class="modal-overlay" id="inbox-modal-overlay">
+  <div class="modal" style="max-width:480px; max-height:80vh; overflow-y:auto;">
+    <h3>📬 תגובות שקיבלת</h3>
+    <div id="inbox-list" style="margin-top:12px;"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn-secondary" id="close-inbox-btn">סגור</button>
     </div>
   </div>
 </div>
@@ -596,7 +610,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getFirestore, collection, addDoc, onSnapshot,
+    getFirestore, collection, collectionGroup, addDoc, onSnapshot,
     query, where, doc, deleteDoc, setDoc, getDoc, updateDoc
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import {
@@ -639,24 +653,69 @@
   let allBuyItems    = [];
 
   /* ── AUTH ── */
+  let unsubInbox = null;
+
   onAuthStateChanged(auth, user => {
     currentUser = user;
     const nameEl    = document.getElementById('user-name');
     const loginBtn  = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
+    const inboxBtn  = document.getElementById('inbox-btn');
     if (user) {
       nameEl.textContent = user.displayName?.split(' ')[0] || '';
       loginBtn.style.display  = 'none';
       logoutBtn.style.display = 'block';
+      inboxBtn.style.display  = 'block';
+      // listen for replies sent to this user
+      if (unsubInbox) unsubInbox();
+      const inboxQ = query(collectionGroup(db, 'messages'), where('replyToUid', '==', user.uid));
+      unsubInbox = onSnapshot(inboxQ, snap => {
+        document.getElementById('inbox-badge').style.display = snap.size > 0 ? 'block' : 'none';
+      });
     } else {
       nameEl.textContent = '';
       loginBtn.style.display  = 'block';
       logoutBtn.style.display = 'none';
+      inboxBtn.style.display  = 'none';
+      if (unsubInbox) { unsubInbox(); unsubInbox = null; }
     }
   });
 
   document.getElementById('login-btn').addEventListener('click', () => {
     signInWithPopup(auth, provider).catch(() => showToast('ההתחברות נכשלה'));
+  });
+
+  document.getElementById('inbox-btn').addEventListener('click', async () => {
+    if (!currentUser) return;
+    const list = document.getElementById('inbox-list');
+    list.innerHTML = '<div style="color:#aaa;font-size:0.85rem;">טוען...</div>';
+    document.getElementById('inbox-modal-overlay').classList.add('open');
+    const inboxQ = query(collectionGroup(db, 'messages'), where('replyToUid', '==', currentUser.uid));
+    const snap = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")
+      .then(m => m.getDocs(inboxQ));
+    if (snap.empty) {
+      list.innerHTML = '<div style="color:#aaa;font-size:0.85rem;">אין תגובות עדיין.</div>';
+    } else {
+      const msgs = snap.docs.map(d => d.data()).sort((a,b) => b.createdAt - a.createdAt);
+      list.innerHTML = msgs.map(m => `
+        <div style="border-bottom:1px solid #f0f0f0; padding:10px 0;">
+          <div style="font-size:0.75rem; color:#aaa; margin-bottom:4px;">${formatTime(m.createdAt)}</div>
+          <div class="msg-reply-quote">
+            <div class="quote-sender">↩ תגובה ל-${escHtml(m.replyTo?.senderName || 'הודעתך')}</div>
+            <div class="quote-text">${escHtml(m.replyTo?.text || '')}</div>
+          </div>
+          <div style="font-weight:bold; color:#6c5ce7; font-size:0.82rem;">${escHtml(m.senderName)}</div>
+          <div style="color:#444; font-size:0.88rem; margin-top:3px;">${escHtml(m.text)}</div>
+        </div>`).join('');
+    }
+  });
+
+  document.getElementById('close-inbox-btn').addEventListener('click', () => {
+    document.getElementById('inbox-modal-overlay').classList.remove('open');
+  });
+  document.getElementById('inbox-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('inbox-modal-overlay'))
+      document.getElementById('inbox-modal-overlay').classList.remove('open');
   });
 
   /* ── SORT ── */
@@ -834,7 +893,7 @@
               <div class="msg-time">${formatTime(m.createdAt)}</div>
               <button class="btn-reply">↩ הגב</button>`;
             item.querySelector('.btn-reply').addEventListener('click', () =>
-              openMsgModal(p.id, { senderName: m.senderName, text: m.text })
+              openMsgModal(p.id, { senderName: m.senderName, text: m.text, senderId: m.senderId })
             );
             msgSec.appendChild(item);
           });
@@ -1169,12 +1228,19 @@
       const btn = document.getElementById('send-msg-btn');
       btn.disabled = false; btn.textContent = 'שלח הודעה';
       const ctx = document.getElementById('msg-reply-context');
+      const visRow = document.getElementById('msg-vis-row');
       if (replyTo) {
         document.getElementById('msg-reply-to-name').textContent = replyTo.senderName;
         document.getElementById('msg-reply-to-text').textContent = replyTo.text;
         ctx.style.display = 'block';
+        visRow.style.display = 'none';
+        msgIsPrivate = true;
       } else {
         ctx.style.display = 'none';
+        visRow.style.display = 'block';
+        msgIsPrivate = false;
+        document.getElementById('vis-public').classList.add('selected');
+        document.getElementById('vis-private').classList.remove('selected');
       }
       document.getElementById('msg-modal-overlay').classList.add('open');
     });
@@ -1208,7 +1274,10 @@
         isPrivate: msgIsPrivate,
         createdAt: Date.now()
       };
-      if (msgReplyTo) msgData.replyTo = msgReplyTo;
+      if (msgReplyTo) {
+        msgData.replyTo = { senderName: msgReplyTo.senderName, text: msgReplyTo.text };
+        msgData.replyToUid = msgReplyTo.senderId;
+      }
       await addDoc(msgsCol, msgData);
       closeMsgModal();
       showToast('ההודעה נשלחה!');
