@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YMZ10JHZCE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YMZ10JHZCE');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שוק הילדים</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f7ff; min-height: 100vh; direction: rtl; }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      padding: 14px 20px; display: flex; align-items: center;
+      justify-content: space-between; box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 1.4rem; color: white; text-shadow: 1px 2px 4px rgba(0,0,0,0.2); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    #back-btn {
+      background: white; border: none; border-radius: 20px;
+      padding: 7px 16px; font-size: 0.9rem; cursor: pointer;
+      color: #ff6b6b; font-weight: bold; display: none;
+    }
+    #user-area { display: flex; align-items: center; gap: 10px; }
+    #user-name { font-size: 0.85rem; color: white; font-weight: 600; }
+    #login-btn, #logout-btn {
+      background: white; border: none; border-radius: 20px;
+      padding: 7px 14px; font-size: 0.85rem; cursor: pointer; font-weight: bold;
+    }
+    #login-btn { color: #ff6b6b; }
+    #logout-btn { color: #888; display: none; }
+
+    /* SCREENS */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* HOME */
+    #home-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: calc(100vh - 60px);
+      gap: 30px; padding: 40px 20px;
+    }
+    #home-screen h2 { font-size: 2rem; color: #333; text-align: center; }
+    .home-buttons { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+    .home-btn {
+      width: 170px; height: 170px; border: none; border-radius: 24px;
+      font-size: 1.2rem; font-weight: bold; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    .home-btn:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.18); }
+    .home-btn .icon { font-size: 2.8rem; }
+    #btn-sell { background: linear-gradient(135deg, #48dbfb, #0abde3); color: white; }
+    #btn-buy  { background: linear-gradient(135deg, #1dd1a1, #10ac84); color: white; }
+
+    /* CATEGORY BAR */
+    .category-bar {
+      display: flex; gap: 10px; padding: 14px 20px;
+      background: white; border-bottom: 2px solid #e0e0e0;
+      overflow-x: auto; position: sticky; top: 0; z-index: 10;
+    }
+    .cat-btn {
+      padding: 9px 20px; border: 2px solid #ddd; border-radius: 30px;
+      background: white; font-size: 0.95rem; cursor: pointer;
+      white-space: nowrap; transition: all 0.15s; font-weight: 600; color: #555;
+    }
+    .cat-btn:hover { border-color: #ff6b6b; color: #ff6b6b; }
+    .cat-btn.active { background: #ff6b6b; border-color: #ff6b6b; color: white; }
+
+    /* SELL */
+    /* SELL MODE SELECT */
+    .sell-mode-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: calc(100vh - 60px); gap: 24px; padding: 40px 20px;
+    }
+    .sell-mode-screen h2 { font-size: 1.6rem; color: #333; }
+    .sell-mode-buttons { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .sell-mode-btn {
+      width: 200px; height: 160px; border: none; border-radius: 20px;
+      font-size: 1.15rem; font-weight: bold; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12); transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .sell-mode-btn:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.18); }
+    .sell-mode-btn .icon { font-size: 2.6rem; }
+    #btn-sell-add    { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
+    #btn-sell-manage { background: linear-gradient(135deg, #fdcb6e, #e17055); color: white; }
+
+    /* ADD PRODUCT SCREEN */
+    #sell-add-content {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: calc(100vh - 160px); gap: 16px;
+    }
+    #add-btn {
+      width: 100px; height: 100px; border-radius: 50%; border: none;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white;
+      font-size: 3.5rem; cursor: pointer; box-shadow: 0 6px 20px rgba(238,90,36,0.4);
+      transition: transform 0.15s; line-height: 1;
+    }
+    #add-btn:hover { transform: scale(1.08); }
+    #add-hint { color: #aaa; font-size: 1rem; }
+
+    /* MANAGE SCREEN */
+    #sell-manage-content { padding: 20px; max-width: 960px; margin: 0 auto; }
+
+    /* CARDS GRID */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+    .product-card {
+      background: white; border-radius: 16px; overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1); transition: transform 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,0.14); }
+    .card-img { width: 100%; max-height: 260px; object-fit: contain; background: #f5f5f5; }
+    .card-img-placeholder {
+      width: 100%; height: 150px;
+      background: linear-gradient(135deg, #f8f8f8, #e0e0e0);
+      display: flex; align-items: center; justify-content: center; font-size: 2.8rem;
+    }
+    .card-body { padding: 14px; flex: 1; }
+    .card-name { font-size: 1.05rem; font-weight: bold; color: #222; margin-bottom: 5px; }
+    .card-desc { font-size: 0.88rem; color: #666; margin-bottom: 10px; line-height: 1.4; }
+    .card-price { font-size: 1.1rem; font-weight: bold; color: #10ac84; margin-bottom: 6px; }
+    .card-phone { font-size: 0.88rem; color: #888; margin-bottom: 10px; }
+    .card-phone a { color: #0abde3; text-decoration: none; }
+    .card-seller { font-size: 0.8rem; color: #bbb; margin-bottom: 10px; }
+    .card-actions { display: flex; gap: 8px; padding: 0 14px 14px; }
+    .btn-msg {
+      flex: 1; padding: 9px; background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+      color: white; border: none; border-radius: 10px;
+      font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-msg:hover { opacity: 0.88; }
+    .btn-delete {
+      padding: 9px 14px; background: #fff0f0; color: #e74c3c;
+      border: 1.5px solid #ffd5d5; border-radius: 10px;
+      font-size: 0.9rem; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-delete:hover { background: #ffe0e0; }
+
+    /* MESSAGES on sell card */
+    .card-messages { border-top: 1px solid #f0f0f0; }
+    .msg-item {
+      padding: 10px 14px; border-bottom: 1px solid #f5f5f5; font-size: 0.85rem;
+    }
+    .msg-sender { font-weight: bold; color: #6c5ce7; margin-bottom: 2px; }
+    .msg-text { color: #444; }
+    .msg-time { font-size: 0.75rem; color: #bbb; margin-top: 2px; }
+    .no-messages { padding: 10px 14px; font-size: 0.82rem; color: #bbb; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 60px 20px; color: #aaa; font-size: 1.05rem; }
+    .empty-state .big-icon { font-size: 3.5rem; margin-bottom: 14px; }
+
+    /* BUY */
+    #buy-toolbar { padding: 12px 20px; background: #f9f9f9; border-bottom: 2px solid #e0e0e0; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    #search-input {
+      flex: 1; min-width: 160px; max-width: 360px; padding: 10px 16px;
+      border: 2px solid #ddd; border-radius: 30px; font-size: 1rem;
+      direction: rtl; font-family: inherit; transition: border-color 0.15s;
+    }
+    #search-input:focus { outline: none; border-color: #1dd1a1; }
+    .sort-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sort-btn {
+      padding: 8px 14px; border: 2px solid #ddd; border-radius: 20px;
+      background: white; font-size: 0.85rem; cursor: pointer; font-weight: 600;
+      color: #666; transition: all 0.15s; white-space: nowrap;
+    }
+    .sort-btn:hover { border-color: #ff6b6b; color: #ff6b6b; }
+    .sort-btn.active { background: #ff6b6b; border-color: #ff6b6b; color: white; }
+    #manage-toolbar { padding: 12px 20px 0; max-width: 960px; margin: 0 auto; display: flex; gap: 6px; flex-wrap: wrap; }
+    #buy-content { padding: 20px; max-width: 960px; margin: 0 auto; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 20px; padding: 28px;
+      width: 92%; max-width: 460px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      animation: popIn 0.2s ease; max-height: 92vh; overflow-y: auto;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .modal h3 { font-size: 1.3rem; margin-bottom: 20px; color: #333; text-align: center; }
+    .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-weight: 600; color: #444; font-size: 0.92rem; }
+    .form-group input, .form-group textarea {
+      border: 2px solid #ddd; border-radius: 10px; padding: 10px 12px;
+      font-size: 0.97rem; font-family: inherit; direction: rtl;
+      transition: border-color 0.15s; width: 100%;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #ff6b6b; }
+    .form-group textarea { resize: vertical; min-height: 75px; }
+    .required-note { font-size: 0.78rem; color: #aaa; margin-bottom: 16px; }
+    .img-upload-label {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      border: 2px dashed #ddd; border-radius: 10px; padding: 11px;
+      transition: border-color 0.15s; color: #888; font-size: 0.92rem;
+    }
+    .img-upload-label:hover { border-color: #ff6b6b; color: #ff6b6b; }
+    #img-input { display: none; }
+    #img-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .preview-thumb {
+      position: relative; width: 80px; height: 80px;
+    }
+    .preview-thumb img {
+      width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #eee;
+    }
+    .preview-remove {
+      position: absolute; top: -6px; right: -6px; width: 20px; height: 20px;
+      background: #e74c3c; color: white; border: none; border-radius: 50%;
+      font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+
+    /* CARD IMAGE GALLERY */
+    .card-gallery { display: flex; overflow-x: auto; gap: 6px; padding: 6px; background: #f5f5f5; }
+    .card-gallery img {
+      height: 180px; width: auto; max-width: 100%; object-fit: contain;
+      border-radius: 8px; cursor: pointer; flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+    .card-gallery img:hover { opacity: 0.85; }
+    .card-gallery-single img { width: 100%; height: auto; max-height: 260px; cursor: pointer; }
+
+    /* LIGHTBOX */
+    #lightbox {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+      z-index: 500; align-items: center; justify-content: center;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 10px; object-fit: contain; }
+    #lightbox-close {
+      position: absolute; top: 18px; left: 18px;
+      background: white; border: none; border-radius: 50%;
+      width: 40px; height: 40px; font-size: 1.3rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.85); border: none; border-radius: 50%;
+      width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: background 0.15s;
+    }
+    .lightbox-nav:hover { background: white; }
+    .lightbox-nav.hidden { display: none; }
+    #lightbox-prev { right: 18px; }
+    #lightbox-next { left: 18px; }
+    #lightbox-counter {
+      position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.5); color: white; padding: 5px 14px;
+      border-radius: 20px; font-size: 0.9rem;
+    }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-primary {
+      flex: 1; padding: 12px;
+      background: linear-gradient(135deg, #1dd1a1, #10ac84);
+      color: white; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 12px 18px; background: #f5f5f5; color: #666;
+      border: none; border-radius: 12px; font-size: 0.97rem; cursor: pointer;
+    }
+    .btn-secondary:hover { background: #ebebeb; }
+    .error-msg { color: #e74c3c; font-size: 0.83rem; margin-top: 8px; display: none; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 40px; color: #aaa; font-size: 1rem; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #333; color: white; padding: 12px 24px;
+      border-radius: 30px; font-size: 0.97rem; opacity: 0;
+      transition: all 0.3s; z-index: 300; pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* WELCOME SCREEN */
+    #welcome-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: calc(100vh - 60px);
+      background: linear-gradient(160deg, #a29bfe 0%, #fd79a8 40%, #feca57 100%);
+      padding: 40px 24px; text-align: center; gap: 28px;
+    }
+    #welcome-screen h2 {
+      font-size: 2.2rem; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      line-height: 1.3;
+    }
+    .welcome-box {
+      background: rgba(255,255,255,0.92); border-radius: 20px;
+      padding: 28px 24px; max-width: 520px; width: 100%;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    .welcome-box p {
+      font-size: 1.05rem; color: #444; line-height: 1.8; text-align: right;
+    }
+    .welcome-box p span {
+      font-weight: bold; color: #6c5ce7;
+    }
+    #start-btn {
+      background: white; border: none; border-radius: 30px;
+      padding: 16px 52px; font-size: 1.3rem; font-weight: bold;
+      color: #6c5ce7; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #start-btn:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(0,0,0,0.2); }
+
+    /* MSG VISIBILITY TOGGLE */
+    .msg-visibility {
+      display: flex; gap: 10px; margin-bottom: 4px;
+    }
+    .msg-vis-btn {
+      flex: 1; padding: 9px; border-radius: 10px; border: 2px solid #ddd;
+      background: white; font-size: 0.9rem; cursor: pointer; font-weight: 600;
+      color: #666; transition: all 0.15s;
+    }
+    .msg-vis-btn.selected { border-color: #6c5ce7; background: #f0eeff; color: #6c5ce7; }
+    .msg-private-badge {
+      display: inline-block; font-size: 0.72rem; background: #fff3cd;
+      color: #856404; border-radius: 20px; padding: 2px 8px; margin-right: 6px; font-weight: 600;
+    }
+
+    /* LIKE BUTTON */
+    .btn-like {
+      padding: 9px 14px; border-radius: 10px; border: 1.5px solid #ffd6d6;
+      background: #fff5f5; color: #e74c3c; font-size: 0.9rem; cursor: pointer;
+      transition: all 0.15s; display: flex; align-items: center; gap: 5px; font-weight: bold;
+    }
+    .btn-like:hover { background: #ffe0e0; }
+    .btn-like.liked { background: #e74c3c; color: white; border-color: #e74c3c; }
+
+    /* AUTH CONFIRM MODAL */
+    #auth-confirm-modal .modal { max-width: 360px; text-align: center; }
+    #auth-confirm-modal .modal p { color: #555; font-size: 1rem; margin-bottom: 24px; line-height: 1.6; }
+    #auth-confirm-modal .modal-actions { justify-content: center; }
+
+    /* LOGIN PROMPT */
+    #login-prompt {
+      text-align: center; padding: 60px 20px; color: #888;
+    }
+    #login-prompt .big-icon { font-size: 3rem; margin-bottom: 14px; }
+    #login-prompt p { margin-bottom: 20px; font-size: 1rem; }
+    .btn-google {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: white; border: 2px solid #ddd; border-radius: 30px;
+      padding: 12px 24px; font-size: 1rem; cursor: pointer; font-weight: bold; color: #333;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: box-shadow 0.15s;
+    }
+    .btn-google:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .btn-google img { width: 22px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛍️ שוק הילדים</h1>
+  <div class="header-right">
+    <div id="user-area">
+      <span id="user-name"></span>
+      <button id="login-btn">התחבר עם Google</button>
+      <button id="logout-btn">התנתק</button>
+    </div>
+    <button id="back-btn">← חזרה</button>
+  </div>
+</header>
+
+<!-- WELCOME -->
+<div id="welcome-screen" class="screen active">
+  <h2>ברוכים הבאים<br>לשוק הילדים! 🛍️</h2>
+  <div class="welcome-box">
+    <p>
+      עליכם לבחור האם תרצו <span>לקנות</span> או <span>למכור</span> במסך הבא.<br><br>
+      אם תבחרו <span>למכור</span> — עליכם לבחור קטגוריה ולהוסיף כרטיס מוצר עם הפרטים עליכם.<br><br>
+      אם תבחרו <span>לקנות</span> — תצטרכו לבחור קטגוריה ולמצוא מוצר שתאהבו. אם מצאתם, תוכלו ליצור קשר עם מספר הטלפון שבכרטיס, או לשלוח הודעה באתר דרך חשבון הגוגל שלכם.
+    </p>
+  </div>
+  <div class="welcome-box" style="max-width:520px; background: rgba(255,255,255,0.75);">
+    <p style="font-size:0.95rem; color:#555;">
+      <span>על האתר:</span> האתר נוצר במטרה לעזור לילדים להרוויח כסף בכוחות עצמם. הקמת האתר הייתה ללא מטרת רווח ואנו מקווים שתצליחו למכור / למצוא מוצר שתאהבו.
+    </p>
+  </div>
+  <button id="start-btn">הבא ←</button>
+</div>
+
+<!-- HOME -->
+<div id="home-screen" class="screen">
+  <h2>מה תרצה לעשות היום?</h2>
+  <div class="home-buttons">
+    <button class="home-btn" id="btn-sell"><span class="icon">📦</span>למכור</button>
+    <button class="home-btn" id="btn-buy"><span class="icon">🔍</span>לקנות</button>
+  </div>
+</div>
+
+<!-- SELL MODE SELECT -->
+<div id="sell-screen" class="screen sell-mode-screen">
+  <h2>מה תרצה לעשות?</h2>
+  <div class="sell-mode-buttons">
+    <button class="sell-mode-btn" id="btn-sell-add">
+      <span class="icon">➕</span>הוסף מוצר
+    </button>
+    <button class="sell-mode-btn" id="btn-sell-manage">
+      <span class="icon">📋</span>נהל את המוצרים שלי
+    </button>
+  </div>
+</div>
+
+<!-- SELL ADD -->
+<div id="sell-add-screen" class="screen">
+  <div class="category-bar" id="sell-cats"></div>
+  <div id="sell-add-content">
+    <button id="add-btn" title="הוסף מוצר">+</button>
+    <div id="add-hint">בחר קטגוריה ולחץ להוספת מוצר</div>
+  </div>
+</div>
+
+<!-- SELL MANAGE -->
+<div id="sell-manage-screen" class="screen">
+  <div id="manage-toolbar" class="sort-bar">
+    <button class="sort-btn active" data-sort="date">🕐 חדש לישן</button>
+    <button class="sort-btn" data-sort="price">💰 מחיר</button>
+    <button class="sort-btn" data-sort="likes">❤️ לייקים</button>
+  </div>
+  <div id="sell-manage-content">
+    <div class="cards-grid" id="manage-cards"><div class="loading">טוען...</div></div>
+  </div>
+</div>
+
+<!-- BUY -->
+<div id="buy-screen" class="screen">
+  <div class="category-bar" id="buy-cats"></div>
+  <div id="buy-toolbar">
+    <input type="text" id="search-input" placeholder="🔍  חפש לפי שם מוצר..." />
+    <div class="sort-bar">
+      <button class="sort-btn active" data-sort="date">🕐 חדש לישן</button>
+      <button class="sort-btn" data-sort="price">💰 מחיר</button>
+      <button class="sort-btn" data-sort="likes">❤️ לייקים</button>
+    </div>
+  </div>
+  <div id="buy-content">
+    <div class="cards-grid" id="buy-cards"><div class="loading">טוען...</div></div>
+  </div>
+</div>
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>פרסום מוצר חדש</h3>
+    <p class="required-note">* שדות חובה</p>
+    <div class="form-group">
+      <label>שם המוצר *</label>
+      <input type="text" id="f-name" placeholder="לדוגמה: עוגיות שוקולד" maxlength="60" />
+    </div>
+    <div class="form-group">
+      <label>תיאור *</label>
+      <textarea id="f-desc" placeholder="תאר את המוצר שלך..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>מחיר (₪) *</label>
+      <input type="number" id="f-price" placeholder="0" min="0" step="0.5" />
+    </div>
+    <div class="form-group">
+      <label>מספר טלפון (לא חובה)</label>
+      <input type="tel" id="f-phone" placeholder="050-0000000" />
+    </div>
+    <div class="form-group">
+      <label>תמונה (לא חובה)</label>
+      <label class="img-upload-label" for="img-input">📷 לחץ להוספת תמונות (אפשר כמה)</label>
+      <input type="file" id="img-input" accept="image/*" multiple />
+      <div id="img-previews"></div>
+    </div>
+    <div class="error-msg" id="form-error">נא למלא את כל שדות החובה</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="publish-btn">פרסם מוצר</button>
+      <button class="btn-secondary" id="cancel-btn">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEND MESSAGE MODAL -->
+<div class="modal-overlay" id="msg-modal-overlay">
+  <div class="modal">
+    <h3>שלח הודעה למפרסם</h3>
+    <div class="form-group">
+      <label>מי יראה את ההודעה?</label>
+      <div class="msg-visibility">
+        <button class="msg-vis-btn selected" id="vis-public">🌍 לכולם</button>
+        <button class="msg-vis-btn" id="vis-private">🔒 רק למוכר</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>ההודעה שלך *</label>
+      <textarea id="msg-text" placeholder="כתוב כאן את הודעתך..." style="min-height:100px"></textarea>
+    </div>
+    <div class="error-msg" id="msg-error">נא לכתוב הודעה</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="send-msg-btn">שלח הודעה</button>
+      <button class="btn-secondary" id="cancel-msg-btn">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <button class="lightbox-nav" id="lightbox-prev">‹</button>
+  <img id="lightbox-img" src="" alt="" />
+  <button class="lightbox-nav" id="lightbox-next">›</button>
+  <div id="lightbox-counter"></div>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div class="modal-overlay" id="edit-modal-overlay">
+  <div class="modal">
+    <h3>עריכת מוצר</h3>
+    <p class="required-note">* שדות חובה</p>
+    <div class="form-group">
+      <label>שם המוצר *</label>
+      <input type="text" id="e-name" maxlength="60" />
+    </div>
+    <div class="form-group">
+      <label>תיאור *</label>
+      <textarea id="e-desc"></textarea>
+    </div>
+    <div class="form-group">
+      <label>מחיר (₪) *</label>
+      <input type="number" id="e-price" min="0" step="0.5" />
+    </div>
+    <div class="form-group">
+      <label>מספר טלפון (לא חובה)</label>
+      <input type="tel" id="e-phone" />
+    </div>
+    <div class="form-group">
+      <label>תמונות</label>
+      <div id="e-img-previews"></div>
+      <label class="img-upload-label" for="e-img-input" style="margin-top:8px">📷 הוסף תמונות</label>
+      <input type="file" id="e-img-input" accept="image/*" multiple />
+    </div>
+    <div class="error-msg" id="edit-error">נא למלא את כל שדות החובה</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="save-edit-btn">שמור שינויים</button>
+      <button class="btn-secondary" id="cancel-edit-btn">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH CONFIRM MODAL -->
+<div class="modal-overlay" id="auth-confirm-modal">
+  <div class="modal">
+    <h3>נדרשת התחברות</h3>
+    <p>כדי לבצע פעולה זו צריך להתחבר לחשבון.<br>תרצה להמשיך?</p>
+    <div class="modal-actions">
+      <button class="btn-primary" id="auth-confirm-yes">כן, התחבר</button>
+      <button class="btn-secondary" id="auth-confirm-no">אחורה</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, onSnapshot,
+    query, where, doc, deleteDoc, setDoc, getDoc, updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAH_c8Chy7n-o5q7li-3hP1MdOfTqgSNOQ",
+    authDomain: "the-kids-market.firebaseapp.com",
+    projectId: "the-kids-market",
+    storageBucket: "the-kids-market.firebasestorage.app",
+    messagingSenderId: "1043973500768",
+    appId: "1:1043973500768:web:5fb8d4331cb2bb875fb805"
+  };
+
+  const app      = initializeApp(firebaseConfig);
+  const db       = getFirestore(app);
+  const auth     = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const col      = collection(db, 'products');
+
+  const CATEGORIES = [
+    { id: 'all',        label: '🏪 הכול' },
+    { id: 'service',    label: '🛠️ שירות' },
+    { id: 'handmade',   label: '🎨 עבודת יד' },
+    { id: 'secondhand', label: '♻️ יד שניה' },
+  ];
+  const CATEGORY_ICONS = { service:'🛠️', handmade:'🎨', secondhand:'♻️', all:'🏪' };
+
+  let currentUser    = null;
+  let currentSellCat = 'all';
+  let currentSellSort = 'date';
+  let currentBuySort  = 'date';
+  const likesCountMap = {};
+  let currentBuyCat  = 'all';
+  let pendingImages  = [];
+  let unsubSell      = null;
+  let unsubBuy       = null;
+  let msgTargetProductId = null;
+  let allBuyItems    = [];
+
+  /* ── AUTH ── */
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    const nameEl    = document.getElementById('user-name');
+    const loginBtn  = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    if (user) {
+      nameEl.textContent = user.displayName?.split(' ')[0] || '';
+      loginBtn.style.display  = 'none';
+      logoutBtn.style.display = 'block';
+    } else {
+      nameEl.textContent = '';
+      loginBtn.style.display  = 'block';
+      logoutBtn.style.display = 'none';
+    }
+  });
+
+  document.getElementById('login-btn').addEventListener('click', () => {
+    signInWithPopup(auth, provider).catch(() => showToast('ההתחברות נכשלה'));
+  });
+
+  /* ── SORT ── */
+  function sortItems(items, sortKey) {
+    return [...items].sort((a, b) => {
+      if (sortKey === 'price') return Number(a.price) - Number(b.price);
+      if (sortKey === 'likes') return (likesCountMap[b.id] || 0) - (likesCountMap[a.id] || 0);
+      return b.createdAt - a.createdAt;
+    });
+  }
+
+  document.querySelectorAll('#manage-toolbar .sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#manage-toolbar .sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSellSort = btn.dataset.sort;
+      subscribeToManage();
+    });
+  });
+
+  document.querySelectorAll('#buy-toolbar .sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#buy-toolbar .sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentBuySort = btn.dataset.sort;
+      renderBuyFiltered();
+    });
+  });
+
+  /* ── AUTH CONFIRM ── */
+  let authCallback = null;
+
+  function requireAuth(callback) {
+    if (currentUser) { callback(); return; }
+    authCallback = callback;
+    document.getElementById('auth-confirm-modal').classList.add('open');
+  }
+
+  document.getElementById('auth-confirm-yes').addEventListener('click', () => {
+    document.getElementById('auth-confirm-modal').classList.remove('open');
+    signInWithPopup(auth, provider)
+      .then(() => { if (authCallback) { authCallback(); authCallback = null; } })
+      .catch(() => showToast('ההתחברות נכשלה'));
+  });
+
+  document.getElementById('auth-confirm-no').addEventListener('click', () => {
+    document.getElementById('auth-confirm-modal').classList.remove('open');
+    authCallback = null;
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    signOut(auth);
+  });
+
+  /* ── SCREENS ── */
+  function showScreen(id, pushHistory = true) {
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active');
+      s.style.display = 'none';
+    });
+    const el = document.getElementById(id);
+    el.classList.add('active');
+    const flexScreens = ['home-screen', 'welcome-screen', 'sell-screen'];
+    el.style.display = flexScreens.includes(id) ? 'flex' : 'block';
+    document.getElementById('back-btn').style.display = (id === 'home-screen' || id === 'welcome-screen') ? 'none' : 'block';
+    if (pushHistory) history.pushState({ screen: id }, '', '');
+  }
+
+  window.addEventListener('popstate', e => {
+    const id = e.state?.screen || 'welcome-screen';
+    if (unsubSell) { unsubSell(); unsubSell = null; }
+    if (unsubBuy)  { unsubBuy();  unsubBuy  = null; }
+    if (id === 'sell-add-screen')    { showScreen(id, false); renderSellCats(); }
+    else if (id === 'sell-manage-screen') { showScreen(id, false); subscribeToManage(); }
+    else if (id === 'buy-screen')    { showScreen(id, false); renderBuyCats(); subscribeToBuy(); }
+    else showScreen(id, false);
+  });
+
+  document.getElementById('btn-sell').addEventListener('click', () => {
+    showScreen('sell-screen');
+  });
+
+  document.getElementById('btn-buy').addEventListener('click', () => {
+    showScreen('buy-screen');
+    renderBuyCats();
+    subscribeToBuy();
+  });
+
+  document.getElementById('back-btn').addEventListener('click', () => {
+    if (unsubSell) { unsubSell(); unsubSell = null; }
+    if (unsubBuy)  { unsubBuy();  unsubBuy  = null; }
+    showScreen('home-screen');
+  });
+
+  /* ── SELL MODE BUTTONS ── */
+  document.getElementById('btn-sell-add').addEventListener('click', () => {
+    requireAuth(() => {
+      showScreen('sell-add-screen');
+      renderSellCats();
+    });
+  });
+
+  document.getElementById('btn-sell-manage').addEventListener('click', () => {
+    requireAuth(() => {
+      showScreen('sell-manage-screen');
+      subscribeToManage();
+    });
+  });
+
+  /* ── FIRESTORE LISTENERS ── */
+  function subscribeToManage() {
+    if (unsubSell) unsubSell();
+    if (!currentUser) return;
+    const grid = document.getElementById('manage-cards');
+    grid.innerHTML = '<div class="loading">טוען...</div>';
+    const q = query(col, where('uid','==', currentUser.uid));
+    unsubSell = onSnapshot(q, snap => {
+      const items = sortItems(snap.docs.map(d => ({ id: d.id, ...d.data() })), currentSellSort);
+      renderManageCards(grid, items);
+    });
+  }
+
+  function subscribeToBuy() {
+    if (unsubBuy) unsubBuy();
+    const grid = document.getElementById('buy-cards');
+    grid.innerHTML = '<div class="loading">טוען...</div>';
+    const q = currentBuyCat === 'all' ? query(col) : query(col, where('category','==', currentBuyCat));
+    unsubBuy = onSnapshot(q, snap => {
+      allBuyItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderBuyFiltered();
+    });
+  }
+
+  function renderBuyFiltered() {
+    const grid    = document.getElementById('buy-cards');
+    const q       = document.getElementById('search-input').value.trim().toLowerCase();
+    const filtered = q ? allBuyItems.filter(p => p.name.toLowerCase().includes(q)) : allBuyItems;
+    renderBuyCards(grid, sortItems(filtered, currentBuySort));
+  }
+  document.getElementById('search-input').addEventListener('input', renderBuyFiltered);
+
+  /* ── RENDER MANAGE CARDS ── */
+  function renderManageCards(grid, items) {
+    grid.innerHTML = '';
+    if (items.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div class="big-icon">📭</div>
+        עדיין לא פרסמת מוצרים.</div>`;
+      return;
+    }
+    for (const p of items) {
+      const card = buildBaseCard(p);
+
+      // messages
+      const msgSec = document.createElement('div');
+      msgSec.className = 'card-messages';
+      card.appendChild(msgSec);
+      const msgsCol = collection(db, 'products', p.id, 'messages');
+      onSnapshot(query(msgsCol), snap => {
+        msgSec.innerHTML = '';
+        const msgs = snap.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
+        if (msgs.length === 0) {
+          msgSec.innerHTML = '<div class="no-messages">אין הודעות עדיין</div>';
+        } else {
+          msgs.forEach(m => {
+            const badge = m.isPrivate ? '<span class="msg-private-badge">🔒 פרטי</span>' : '';
+            msgSec.innerHTML += `<div class="msg-item">
+              <div class="msg-sender">${badge}${escHtml(m.senderName)}</div>
+              <div class="msg-text">${escHtml(m.text)}</div>
+              <div class="msg-time">${formatTime(m.createdAt)}</div>
+            </div>`;
+          });
+        }
+      });
+
+      // edit + delete buttons
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn-msg';
+      editBtn.textContent = '✏️ ערוך';
+      editBtn.addEventListener('click', () => openEditModal(p));
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-delete';
+      delBtn.textContent = '🗑️ מחק';
+      delBtn.addEventListener('click', () => deleteProduct(p.id));
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      card.appendChild(actions);
+      grid.appendChild(card);
+    }
+  }
+
+  /* ── RENDER BUY CARDS (with send message + like) ── */
+  function renderBuyCards(grid, items) {
+    grid.innerHTML = '';
+    if (items.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div class="big-icon">🔍</div>
+        אין מוצרים בקטגוריה זו עדיין.</div>`;
+      return;
+    }
+    items.forEach(p => {
+      const card = buildBaseCard(p);
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      // like button
+      const likeBtn = document.createElement('button');
+      likeBtn.className = 'btn-like';
+      likeBtn.innerHTML = '❤️ <span class="like-count">0</span>';
+      const likesCol = collection(db, 'products', p.id, 'likes');
+      onSnapshot(likesCol, snap => {
+        const count = snap.size;
+        likesCountMap[p.id] = count;
+        const liked = currentUser && snap.docs.some(d => d.id === currentUser.uid);
+        likeBtn.innerHTML = `${liked ? '❤️' : '🤍'} <span class="like-count">${count}</span>`;
+        likeBtn.className = 'btn-like' + (liked ? ' liked' : '');
+      });
+      likeBtn.addEventListener('click', () => toggleLike(p.id));
+
+      // message button
+      const msgBtn = document.createElement('button');
+      msgBtn.className = 'btn-msg';
+      msgBtn.textContent = '✉️ שלח הודעה';
+      msgBtn.addEventListener('click', () => openMsgModal(p.id));
+
+      actions.appendChild(likeBtn);
+      actions.appendChild(msgBtn);
+      card.appendChild(actions);
+      grid.appendChild(card);
+    });
+  }
+
+  /* ── LIKES ── */
+  async function toggleLike(productId) {
+    requireAuth(async () => {
+      const likeRef = doc(db, 'products', productId, 'likes', currentUser.uid);
+      const snap = await getDoc(likeRef);
+      if (snap.exists()) {
+        await deleteDoc(likeRef);
+      } else {
+        await setDoc(likeRef, { uid: currentUser.uid, createdAt: Date.now() });
+      }
+    });
+  }
+
+  /* ── BASE CARD ── */
+  function buildBaseCard(p) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    const imgs = p.images?.length ? p.images : (p.image ? [p.image] : []);
+    let imgHtml;
+    if (imgs.length === 0) {
+      imgHtml = `<div class="card-img-placeholder">${CATEGORY_ICONS[p.category] || '📦'}</div>`;
+    } else if (imgs.length === 1) {
+      imgHtml = `<div class="card-gallery card-gallery-single"><img src="${imgs[0]}" alt="${escHtml(p.name)}" data-lightbox /></div>`;
+    } else {
+      imgHtml = `<div class="card-gallery">${imgs.map(src => `<img src="${src}" alt="${escHtml(p.name)}" data-lightbox />`).join('')}</div>`;
+    }
+    const phoneHtml = p.phone
+      ? `<div class="card-phone">📞 <a href="tel:${escHtml(p.phone)}">${escHtml(p.phone)}</a></div>`
+      : '';
+    card.innerHTML = `
+      ${imgHtml}
+      <div class="card-body">
+        <div class="card-name">${escHtml(p.name)}</div>
+        <div class="card-desc">${escHtml(p.desc)}</div>
+        <div class="card-price">₪${Number(p.price).toLocaleString('he-IL')}</div>
+        ${phoneHtml}
+        <div class="card-seller">פורסם על ידי ${escHtml(p.sellerName || 'אנונימי')}</div>
+      </div>`;
+    return card;
+  }
+
+  /* ── EDIT ── */
+  let editingProductId = null;
+  let editImages = [];
+
+  function renderEditPreviews() {
+    const container = document.getElementById('e-img-previews');
+    container.innerHTML = '';
+    editImages.forEach((src, idx) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'preview-thumb';
+      thumb.innerHTML = `<img src="${src}" /><button class="preview-remove" title="הסר">✕</button>`;
+      thumb.querySelector('.preview-remove').addEventListener('click', () => {
+        editImages.splice(idx, 1);
+        renderEditPreviews();
+      });
+      container.appendChild(thumb);
+    });
+  }
+
+  function openEditModal(p) {
+    editingProductId = p.id;
+    editImages = p.images?.length ? [...p.images] : (p.image ? [p.image] : []);
+    document.getElementById('e-name').value  = p.name;
+    document.getElementById('e-desc').value  = p.desc;
+    document.getElementById('e-price').value = p.price;
+    document.getElementById('e-phone').value = p.phone || '';
+    document.getElementById('e-img-input').value = '';
+    document.getElementById('edit-error').style.display = 'none';
+    renderEditPreviews();
+    const btn = document.getElementById('save-edit-btn');
+    btn.disabled = false; btn.textContent = 'שמור שינויים';
+    document.getElementById('edit-modal-overlay').classList.add('open');
+  }
+
+  document.getElementById('e-img-input').addEventListener('change', async function() {
+    for (const file of Array.from(this.files)) {
+      const data = await compressImage(file);
+      editImages.push(data);
+    }
+    this.value = '';
+    renderEditPreviews();
+  });
+
+  document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+    document.getElementById('edit-modal-overlay').classList.remove('open');
+  });
+
+  document.getElementById('save-edit-btn').addEventListener('click', async () => {
+    const name  = document.getElementById('e-name').value.trim();
+    const desc  = document.getElementById('e-desc').value.trim();
+    const price = document.getElementById('e-price').value.trim();
+    const phone = document.getElementById('e-phone').value.trim();
+    const err   = document.getElementById('edit-error');
+    if (!name || !desc || !price) { err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    const btn = document.getElementById('save-edit-btn');
+    btn.disabled = true; btn.textContent = 'שומר...';
+    try {
+      await updateDoc(doc(db, 'products', editingProductId), { name, desc, price, phone, images: editImages });
+      document.getElementById('edit-modal-overlay').classList.remove('open');
+      showToast('המוצר עודכן בהצלחה!');
+    } catch(e) {
+      err.textContent = 'שגיאה בשמירה. נסה שוב.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'שמור שינויים';
+    }
+  });
+
+  /* ── DELETE ── */
+  async function deleteProduct(productId) {
+    if (!confirm('למחוק את המוצר?')) return;
+    try {
+      await deleteDoc(doc(db, 'products', productId));
+      showToast('המוצר נמחק');
+    } catch(e) {
+      showToast('שגיאה במחיקה');
+    }
+  }
+
+  /* ── CATEGORY BARS ── */
+  function buildCatBar(containerId, activeCat, onSelect) {
+    const bar = document.getElementById(containerId);
+    bar.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn' + (cat.id === activeCat ? ' active' : '');
+      btn.textContent = cat.label;
+      btn.addEventListener('click', () => onSelect(cat.id));
+      bar.appendChild(btn);
+    });
+  }
+
+  function renderSellCats() {
+    buildCatBar('sell-cats', currentSellCat, id => {
+      currentSellCat = id; renderSellCats(); subscribeToSell();
+    });
+  }
+
+  function renderBuyCats() {
+    buildCatBar('buy-cats', currentBuyCat, id => {
+      currentBuyCat = id; renderBuyCats(); subscribeToBuy();
+    });
+  }
+
+  /* ── ADD PRODUCT MODAL ── */
+  document.getElementById('add-btn').addEventListener('click', () => openModal());
+  document.getElementById('cancel-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  });
+
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+    ['f-name','f-desc','f-price','f-phone'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('img-input').value = '';
+    document.getElementById('img-previews').innerHTML = '';
+    document.getElementById('form-error').style.display = 'none';
+    const btn = document.getElementById('publish-btn');
+    btn.disabled = false; btn.textContent = 'פרסם מוצר';
+    pendingImages = [];
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function compressImage(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 800;
+          let w = img.width, h = img.height;
+          if (w > MAX) { h = h * MAX / w; w = MAX; }
+          if (h > MAX) { w = w * MAX / h; h = MAX; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.75));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  document.getElementById('img-input').addEventListener('change', async function() {
+    const files = Array.from(this.files);
+    if (!files.length) return;
+    const container = document.getElementById('img-previews');
+    for (const file of files) {
+      const data = await compressImage(file);
+      pendingImages.push(data);
+      const idx = pendingImages.length - 1;
+      const thumb = document.createElement('div');
+      thumb.className = 'preview-thumb';
+      thumb.innerHTML = `<img src="${data}" /><button class="preview-remove" title="הסר">✕</button>`;
+      thumb.querySelector('.preview-remove').addEventListener('click', () => {
+        pendingImages.splice(idx, 1);
+        thumb.remove();
+      });
+      container.appendChild(thumb);
+    }
+    this.value = '';
+  });
+
+  document.getElementById('publish-btn').addEventListener('click', async () => {
+    const name  = document.getElementById('f-name').value.trim();
+    const desc  = document.getElementById('f-desc').value.trim();
+    const price = document.getElementById('f-price').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const err   = document.getElementById('form-error');
+
+    if (!name || !desc || !price) {
+      err.textContent = 'נא למלא את כל שדות החובה';
+      err.style.display = 'block'; return;
+    }
+    err.style.display = 'none';
+    const btn = document.getElementById('publish-btn');
+    btn.disabled = true; btn.textContent = 'מפרסם...';
+
+    try {
+      await addDoc(col, {
+        category: currentSellCat, name, desc, price, phone,
+        images: pendingImages.length ? pendingImages : [],
+        uid: currentUser.uid,
+        sellerName: currentUser.displayName || 'אנונימי',
+        createdAt: Date.now()
+      });
+      closeModal();
+      showToast('המוצר פורסם בהצלחה! 🎉');
+    } catch(e) {
+      err.textContent = 'שגיאה בפרסום. נסה שוב.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'פרסם מוצר';
+    }
+  });
+
+  /* ── SEND MESSAGE MODAL ── */
+  let msgIsPrivate = false;
+
+  document.getElementById('vis-public').addEventListener('click', () => {
+    msgIsPrivate = false;
+    document.getElementById('vis-public').classList.add('selected');
+    document.getElementById('vis-private').classList.remove('selected');
+  });
+  document.getElementById('vis-private').addEventListener('click', () => {
+    msgIsPrivate = true;
+    document.getElementById('vis-private').classList.add('selected');
+    document.getElementById('vis-public').classList.remove('selected');
+  });
+
+  function openMsgModal(productId) {
+    requireAuth(() => {
+      msgTargetProductId = productId;
+      msgIsPrivate = false;
+      document.getElementById('vis-public').classList.add('selected');
+      document.getElementById('vis-private').classList.remove('selected');
+      document.getElementById('msg-text').value = '';
+      document.getElementById('msg-error').style.display = 'none';
+      const btn = document.getElementById('send-msg-btn');
+      btn.disabled = false; btn.textContent = 'שלח הודעה';
+      document.getElementById('msg-modal-overlay').classList.add('open');
+    });
+  }
+
+  function closeMsgModal() {
+    document.getElementById('msg-modal-overlay').classList.remove('open');
+    msgTargetProductId = null;
+  }
+
+  document.getElementById('cancel-msg-btn').addEventListener('click', closeMsgModal);
+  document.getElementById('msg-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('msg-modal-overlay')) closeMsgModal();
+  });
+
+  document.getElementById('send-msg-btn').addEventListener('click', async () => {
+    const text = document.getElementById('msg-text').value.trim();
+    const err  = document.getElementById('msg-error');
+    if (!text) { err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    const btn = document.getElementById('send-msg-btn');
+    btn.disabled = true; btn.textContent = 'שולח...';
+
+    try {
+      const msgsCol = collection(db, 'products', msgTargetProductId, 'messages');
+      await addDoc(msgsCol, {
+        text,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || 'אנונימי',
+        isPrivate: msgIsPrivate,
+        createdAt: Date.now()
+      });
+      closeMsgModal();
+      showToast('ההודעה נשלחה!');
+    } catch(e) {
+      err.textContent = 'שגיאה בשליחה. נסה שוב.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'שלח הודעה';
+    }
+  });
+
+  /* ── LIGHTBOX ── */
+  let lightboxImages = [];
+  let lightboxIndex  = 0;
+
+  function openLightbox(images, index) {
+    lightboxImages = images;
+    lightboxIndex  = index;
+    updateLightbox();
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function updateLightbox() {
+    document.getElementById('lightbox-img').src = lightboxImages[lightboxIndex];
+    const total = lightboxImages.length;
+    document.getElementById('lightbox-counter').textContent = total > 1 ? `${lightboxIndex + 1} / ${total}` : '';
+    document.getElementById('lightbox-counter').style.display = total > 1 ? 'block' : 'none';
+    document.getElementById('lightbox-prev').classList.toggle('hidden', lightboxIndex === 0);
+    document.getElementById('lightbox-next').classList.toggle('hidden', lightboxIndex === total - 1);
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
+  document.addEventListener('click', e => {
+    if (e.target.matches('[data-lightbox]')) {
+      const gallery = e.target.closest('.card-gallery');
+      const allImgs = gallery ? Array.from(gallery.querySelectorAll('[data-lightbox]')) : [e.target];
+      const index   = allImgs.indexOf(e.target);
+      openLightbox(allImgs.map(i => i.src), index);
+    }
+  });
+
+  document.getElementById('lightbox-prev').addEventListener('click', e => {
+    e.stopPropagation();
+    if (lightboxIndex > 0) { lightboxIndex--; updateLightbox(); }
+  });
+  document.getElementById('lightbox-next').addEventListener('click', e => {
+    e.stopPropagation();
+    if (lightboxIndex < lightboxImages.length - 1) { lightboxIndex++; updateLightbox(); }
+  });
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+  document.getElementById('lightbox').addEventListener('click', e => {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { if (lightboxIndex > 0) { lightboxIndex--; updateLightbox(); } }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') { if (lightboxIndex < lightboxImages.length - 1) { lightboxIndex++; updateLightbox(); } }
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  // swipe support
+  let touchStartX = 0;
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) < 40) return;
+    if (diff > 0 && lightboxIndex < lightboxImages.length - 1) { lightboxIndex++; updateLightbox(); }
+    if (diff < 0 && lightboxIndex > 0) { lightboxIndex--; updateLightbox(); }
+  });
+
+  /* ── HELPERS ── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  document.getElementById('start-btn').addEventListener('click', () => {
+    showScreen('home-screen');
+  });
+
+  history.replaceState({ screen: 'welcome-screen' }, '', '');
+  showScreen('welcome-screen', false);
+</script>
+</body>
+</html>
