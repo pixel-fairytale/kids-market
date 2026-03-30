@@ -414,7 +414,7 @@
     </p>
   </div>
   <button id="start-btn">הבא ←</button>
-  <div style="font-size:0.72rem; color:rgba(255,255,255,0.6);">v1.2</div>
+  <div style="font-size:0.72rem; color:rgba(255,255,255,0.6);">v1.3</div>
 </div>
 
 <!-- HOME -->
@@ -668,10 +668,15 @@
       inboxBtn.style.display  = 'block';
       // listen for replies sent to this user
       if (unsubInbox) unsubInbox();
-      const inboxQ = query(collectionGroup(db, 'messages'), where('replyToUid', '==', user.uid));
-      unsubInbox = onSnapshot(inboxQ, snap => {
-        document.getElementById('inbox-badge').style.display = snap.size > 0 ? 'block' : 'none';
-      });
+      const inboxQ1 = query(collectionGroup(db, 'messages'), where('productOwnerUid', '==', user.uid));
+      const inboxQ2 = query(collectionGroup(db, 'messages'), where('replyToUid', '==', user.uid));
+      let snap1Size = 0, snap2Size = 0;
+      const updateBadge = () => {
+        document.getElementById('inbox-badge').style.display = (snap1Size + snap2Size) > 0 ? 'block' : 'none';
+      };
+      const unsub1 = onSnapshot(inboxQ1, snap => { snap1Size = snap.size; updateBadge(); });
+      const unsub2 = onSnapshot(inboxQ2, snap => { snap2Size = snap.size; updateBadge(); });
+      unsubInbox = () => { unsub1(); unsub2(); };
     } else {
       nameEl.textContent = '';
       loginBtn.style.display  = 'block';
@@ -690,23 +695,36 @@
     const list = document.getElementById('inbox-list');
     list.innerHTML = '<div style="color:#aaa;font-size:0.85rem;">טוען...</div>';
     document.getElementById('inbox-modal-overlay').classList.add('open');
-    const inboxQ = query(collectionGroup(db, 'messages'), where('replyToUid', '==', currentUser.uid));
-    const snap = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")
-      .then(m => m.getDocs(inboxQ));
-    if (snap.empty) {
-      list.innerHTML = '<div style="color:#aaa;font-size:0.85rem;">אין תגובות עדיין.</div>';
-    } else {
-      const msgs = snap.docs.map(d => d.data()).sort((a,b) => b.createdAt - a.createdAt);
-      list.innerHTML = msgs.map(m => `
-        <div style="border-bottom:1px solid #f0f0f0; padding:10px 0;">
-          <div style="font-size:0.75rem; color:#aaa; margin-bottom:4px;">${formatTime(m.createdAt)}</div>
-          <div class="msg-reply-quote">
-            <div class="quote-sender">↩ תגובה ל-${escHtml(m.replyTo?.senderName || 'הודעתך')}</div>
-            <div class="quote-text">${escHtml(m.replyTo?.text || '')}</div>
-          </div>
-          <div style="font-weight:bold; color:#6c5ce7; font-size:0.82rem;">${escHtml(m.senderName)}</div>
-          <div style="color:#444; font-size:0.88rem; margin-top:3px;">${escHtml(m.text)}</div>
-        </div>`).join('');
+    try {
+      const fs = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const q1 = query(collectionGroup(db, 'messages'), where('productOwnerUid', '==', currentUser.uid));
+      const q2 = query(collectionGroup(db, 'messages'), where('replyToUid', '==', currentUser.uid));
+      const [snap1, snap2] = await Promise.all([fs.getDocs(q1), fs.getDocs(q2)]);
+      const seen = new Set();
+      const msgs = [];
+      [...snap1.docs, ...snap2.docs].forEach(d => {
+        if (!seen.has(d.id)) { seen.add(d.id); msgs.push(d.data()); }
+      });
+      msgs.sort((a,b) => b.createdAt - a.createdAt);
+      if (msgs.length === 0) {
+        list.innerHTML = '<div style="color:#aaa;font-size:0.85rem;">אין הודעות עדיין.</div>';
+      } else {
+        list.innerHTML = msgs.map(m => {
+          const quoteHtml = m.replyTo ? `<div class="msg-reply-quote">
+            <div class="quote-sender">↩ תגובה ל-${escHtml(m.replyTo.senderName)}</div>
+            <div class="quote-text">${escHtml(m.replyTo.text)}</div>
+          </div>` : '';
+          return `<div style="border-bottom:1px solid #f0f0f0; padding:10px 0;">
+            <div style="font-size:0.75rem; color:#aaa; margin-bottom:4px;">${formatTime(m.createdAt)}</div>
+            ${quoteHtml}
+            <div style="font-weight:bold; color:#6c5ce7; font-size:0.82rem;">${escHtml(m.senderName)}</div>
+            <div style="color:#444; font-size:0.88rem; margin-top:3px;">${escHtml(m.text)}</div>
+          </div>`;
+        }).join('');
+      }
+    } catch(e) {
+      console.error('Inbox error:', e);
+      list.innerHTML = '<div style="color:#e74c3c;font-size:0.85rem;">שגיאה בטעינה. פתח Console (F12) ולחץ על הקישור ליצירת index.</div>';
     }
   });
 
@@ -952,7 +970,7 @@
       const msgBtn = document.createElement('button');
       msgBtn.className = 'btn-msg';
       msgBtn.textContent = '✉️ שלח הודעה';
-      msgBtn.addEventListener('click', () => openMsgModal(p.id));
+      msgBtn.addEventListener('click', () => openMsgModal(p.id, null, p.uid));
 
       actions.appendChild(likeBtn);
       actions.appendChild(msgBtn);
@@ -1216,9 +1234,12 @@
     document.getElementById('vis-public').classList.remove('selected');
   });
 
-  function openMsgModal(productId, replyTo = null) {
+  let msgProductOwnerUid = null;
+
+  function openMsgModal(productId, replyTo = null, productOwnerUid = null) {
     requireAuth(() => {
       msgTargetProductId = productId;
+      msgProductOwnerUid = productOwnerUid;
       msgIsPrivate = false;
       msgReplyTo = replyTo;
       document.getElementById('vis-public').classList.add('selected');
@@ -1274,9 +1295,11 @@
         isPrivate: msgIsPrivate,
         createdAt: Date.now()
       };
+      if (msgProductOwnerUid) msgData.productOwnerUid = msgProductOwnerUid;
       if (msgReplyTo) {
         msgData.replyTo = { senderName: msgReplyTo.senderName, text: msgReplyTo.text };
         msgData.replyToUid = msgReplyTo.senderId;
+        msgData.productOwnerUid = currentUser.uid;
       }
       await addDoc(msgsCol, msgData);
       closeMsgModal();
